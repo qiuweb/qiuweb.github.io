@@ -1,0 +1,389 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>信息搜集1 | web渗透学习</title><meta name="keywords" content="blog, 博客"><meta name="author" content="Qweb"><meta name="copyright" content="Qweb"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="web1F12控制台查看源码  web21.不能使用控制台和鼠标右键，但是可以用快捷键，Ctrl+U查看源码 2.提示给的是在网址前面加上view-source:  web3burp抓包，响应头中有flag  web4​	robots.txt有flag的文件名，在网址后面加上文件名访问得flag  web5题目给提示phps泄露，以为是php，一直访问无果 看了hint后是访问index.php">
+<meta property="og:type" content="article">
+<meta property="og:title" content="信息搜集1">
+<meta property="og:url" content="https://qiuweb.github.io/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/index.html">
+<meta property="og:site_name" content="web渗透学习">
+<meta property="og:description" content="web1F12控制台查看源码  web21.不能使用控制台和鼠标右键，但是可以用快捷键，Ctrl+U查看源码 2.提示给的是在网址前面加上view-source:  web3burp抓包，响应头中有flag  web4​	robots.txt有flag的文件名，在网址后面加上文件名访问得flag  web5题目给提示phps泄露，以为是php，一直访问无果 看了hint后是访问index.php">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://qiuweb.github.io/img/bg.jpg">
+<meta property="article:published_time" content="2022-09-09T18:08:11.000Z">
+<meta property="article:modified_time" content="2022-09-10T02:18:49.911Z">
+<meta property="article:author" content="Qweb">
+<meta property="article:tag" content="blog, 博客">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://qiuweb.github.io/img/bg.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://qiuweb.github.io/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":50,"languages":{"author":"作者: Qweb","link":"链接: ","source":"来源: web渗透学习","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: true
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '信息搜集1',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-09-10 10:18:49'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/style.css"><meta name="generator" content="Hexo 6.2.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/./img/hacker.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-list"></i><span> 链接</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/./img/bg.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">web渗透学习</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fa fa-list"></i><span> 链接</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友情链接</span></a></li><li><a class="site-page child" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></li></ul></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">信息搜集1</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-09-09T18:08:11.000Z" title="发表于 2022-09-10 02:08:11">2022-09-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-09-10T02:18:49.911Z" title="更新于 2022-09-10 10:18:49">2022-09-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ctfshow%E5%88%B7%E9%A2%98%E4%B9%8B%E8%B7%AF/">ctfshow刷题之路</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.3k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="信息搜集1"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src="https://qiuweb.oss-cn-hangzhou.aliyuncs.com/img/ctfshow_info_search/background.jpg" alt="s"></p>
+<h3 id="web1"><a href="#web1" class="headerlink" title="web1"></a>web1</h3><p>F12控制台查看源码</p>
+<hr>
+<h3 id="web2"><a href="#web2" class="headerlink" title="web2"></a>web2</h3><p>1.不能使用控制台和鼠标右键，但是可以用快捷键，Ctrl+U查看源码</p>
+<p>2.提示给的是在网址前面加上view-source:</p>
+<hr>
+<h3 id="web3"><a href="#web3" class="headerlink" title="web3"></a>web3</h3><p>burp抓包，响应头中有flag</p>
+<hr>
+<h3 id="web4"><a href="#web4" class="headerlink" title="web4"></a>web4</h3><p>​	robots.txt有flag的文件名，在网址后面加上文件名访问得flag</p>
+<hr>
+<h3 id="web5"><a href="#web5" class="headerlink" title="web5"></a>web5</h3><p>题目给提示phps泄露，以为是php，一直访问无果</p>
+<p>看了<em><strong>hint</strong></em>后是访问index.phps，然后就下载了源码，得到flag</p>
+<p><em><strong>注：</strong></em></p>
+<p><em>phps文件就是php的源代码文件，通常用于提供给用户（访问者）直接通过Web浏览器查看php代码的内容。</em></p>
+<hr>
+<h3 id="web6"><a href="#web6" class="headerlink" title="web6"></a>web6</h3><p>题目提示：解压源码到当前目录，测试正常，收工</p>
+<p>看题目提示是有源码泄露，不过没有扫出来，有点烦，不太懂该咋做</p>
+<p>看了眼提示，<a target="_blank" rel="noopener" href="http://www.zip,这个我知道,下载下来后,index.php中说/">www.zip，这个我知道，下载下来后，index.php中说</a></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flag in fl000g.txt</span><br></pre></td></tr></table></figure>
+
+<p>压缩包里哪个fl000g.txt是假的，网页上访问得flag</p>
+<hr>
+<h3 id="web7"><a href="#web7" class="headerlink" title="web7"></a>web7</h3><p>题目提示：版本控制很重要，但不要部署到生产环境更重要。</p>
+<p>这一看就是git泄露，本来想用githack给down下来，但是网页后面直接加上	<em><strong>.git</strong></em>	flag就直接出了</p>
+<p>好吧，我有用githack给Down了一波，啥也没有</p>
+<p>最后看了下<em><strong>hint</strong></em>：<em>考察git代码泄露，直接访问url&#x2F;.git&#x2F;index.php</em></p>
+<hr>
+<h3 id="web8"><a href="#web8" class="headerlink" title="web8"></a>web8</h3><p>题目提示：版本控制很重要，但不要部署到生产环境更重要。</p>
+<p>跟上一题的题目一样，**.git**	一下，无果，githack，无果</p>
+<p>一时没有头绪，看了眼  <em><strong>hint</strong></em>：<em><strong>考察信息svn泄露,直接访问url&#x2F;.svn&#x2F;</strong></em></p>
+<p>看到这我赶紧去补了下源码泄露</p>
+<p>网站：<a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_50854662/article/details/125738844">https://blog.csdn.net/qq_50854662/article/details/125738844</a></p>
+<p>以备不时之需</p>
+<hr>
+<h3 id="web9"><a href="#web9" class="headerlink" title="web9"></a>web9</h3><p>题目提示：发现网页有个错别字？赶紧在生产环境vim改下，不好，死机了</p>
+<p>根据提示，那就是有vim的缓存，上网查询一下vim缓存的样式</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">.swp</span><br></pre></td></tr></table></figure>
+
+<p>网址加上  <strong>index.php.swp</strong>  下载缓存文件，打开得到flag</p>
+<p>最后看一眼<em><strong>hint</strong></em>跟我想的一样，还给了个网址：<a target="_blank" rel="noopener" href="https://blog.csdn.net/a597934448/article/details/105431367%E5%8C%85%E6%8B%AC%E4%BA%86%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2%E7%9A%84%E7%9F%A5%E8%AF%86">https://blog.csdn.net/a597934448/article/details/105431367包括了信息泄露的知识</a></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909165434903.png" alt="image-20220909165434903"></p>
+<p>里面有个脚本比较有意思</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> requests</span><br><span class="line">url = <span class="string">&#x27;&#x27;</span></span><br><span class="line">names = [<span class="string">&#x27;web&#x27;</span>, <span class="string">&#x27;website&#x27;</span>, <span class="string">&#x27;backup&#x27;</span>, <span class="string">&#x27;back&#x27;</span>, <span class="string">&#x27;www&#x27;</span>, <span class="string">&#x27;wwwroot&#x27;</span>, <span class="string">&#x27;temp&#x27;</span>]</span><br><span class="line">suffixes = [<span class="string">&#x27;tar&#x27;</span>, <span class="string">&#x27;tar.gz&#x27;</span>, <span class="string">&#x27;zip&#x27;</span> ,<span class="string">&#x27;rar&#x27;</span>]</span><br><span class="line"><span class="keyword">for</span> name <span class="keyword">in</span> names :</span><br><span class="line">    <span class="keyword">for</span> suffix <span class="keyword">in</span> suffix:</span><br><span class="line">        position = url + name + <span class="string">&#x27;.&#x27;</span> + suffix</span><br><span class="line">        responce = requests.get(position)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;<span class="subst">&#123;name&#125;</span>.<span class="subst">&#123;suffix&#125;</span>:	<span class="subst">&#123;responce&#125;</span>&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>拿来试一试上面的web6试试水，回显都是200，看不出啥东西来</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909165622878.png" alt="image-20220909165622878"></p>
+<p>酌情考虑使用</p>
+<h3 id="web10"><a href="#web10" class="headerlink" title="web10"></a>web10</h3><p>题目提示：cookie 只是一块饼干，不能存放任何隐私数据</p>
+<p>猜测flag就在cookie中</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909170009388.png" alt="image-20220909170009388"></p>
+<hr>
+<h3 id="web11"><a href="#web11" class="headerlink" title="web11"></a>web11</h3><p>题目提示：域名其实也可以隐藏信息，比如flag.ctfshow.com 就隐藏了一条信息</p>
+<p>用了网站的whois查询，无果，用linux的whois命令，还是啥也没有，这还能有个啥，怀着这样的心情点开了<em><strong>hint</strong></em>：</p>
+<p><em><strong>通过dns检查查询flag <a target="_blank" rel="noopener" href="https://zijian.aliyun.com/">https://zijian.aliyun.com/</a> TXT 记录，一般指为某个主机名或域名设置的说明。查找flag.ctfshow.com域名下的txt记录</strong></em></p>
+<p>好吧，是我工具找的不对</p>
+<hr>
+<h3 id="web12"><a href="#web12" class="headerlink" title="web12"></a>web12</h3><p>题目提示：有时候网站上的公开信息，就是管理员常用密码</p>
+<p>意思很明显，找到密码登录，但是我一直没有找到登录页面在哪，多此尝试后还是没找到</p>
+<p><em><strong>hint：查看robots.txt文件，用户名admin。密码：在页面的最下方</strong></em></p>
+<p>打开了robots.txt，看到了<img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909173830118.png" alt="image-20220909173830118">还是没找到登录页面在哪里</p>
+<p>网上查了下wp，发现网址加上&#x2F;admin&#x2F;就能登录，麻了，果然是我的思维还不够，得继续加强</p>
+<hr>
+<h3 id="web13"><a href="#web13" class="headerlink" title="web13"></a>web13</h3><p>题目提示：技术文档里面不要出现敏感信息，部署到生产环境后及时修改默认密码</p>
+<p>既然题目这样说了，那么就要找到文档，但是一直没有找到，也尝试了之前的各种登录网页，无果</p>
+<p><em><strong>hint：根据题目提示 技术文档 在页面下面发现 document 下载发现里面存在后台地址和用户名密码登录成功获 得flag</strong></em></p>
+<p>确实没发现，看了还是不仔细</p>
+<p><strong>下次直接控制台搜href</strong></p>
+<hr>
+<h3 id="web14"><a href="#web14" class="headerlink" title="web14"></a>web14</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909235650919.png" alt="image-20220909235650919"></p>
+<p>editor信息尝试了各种姿势，没有找到</p>
+<p>查看源码，发现一张关于editor的图片</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909235752920.png" alt="image-20220909235752920"></p>
+<p>但是没有在意</p>
+<p>实在无法了，查看<em><strong>hint</strong></em></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909235827891.png" alt="image-20220909235827891"></p>
+<p>瞬间联系起来了，访问网页</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909235900021.png" alt="image-20220909235900021"></p>
+<p>这么个玩意，尝试了各种按钮，最后有用的只有图片按钮</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220909235949896.png" alt="image-20220909235949896"></p>
+<p>第一次没注意，选择了本地上传，屁用没有</p>
+<p>还是网上查了下wp后才得到还有个图片空间的东西，但是也是一直东翻西找，最后才在图片上看到了这个东西</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910000212900.png" alt="image-20220910000212900"></p>
+<p>在网页目录下找到</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910000244756.png" alt="image-20220910000244756"></p>
+<p>按照一般网页配置截断地址，访问得flag</p>
+<hr>
+<h3 id="web15"><a href="#web15" class="headerlink" title="web15"></a>web15</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910001550201.png" alt="image-20220910001550201"></p>
+<p>找到他的邮箱</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910001614990.png" alt="image-20220910001614990"></p>
+<p>但是布置到怎么用，尝试许久后看了眼<em><strong>hint</strong></em></p>
+<p>网站后面加	<em><strong>&#x2F;admin</strong></em></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910001813687.png" alt="image-20220910001813687"></p>
+<p>猜测用户名是admin，输入密码，提示<strong>密码错误</strong></p>
+<p>换个用户名，提示<strong>用户名错误</strong>，看了用户名就是admin了</p>
+<p>用邮箱尝试登录，一直错误，又看了眼<em><strong>hint</strong></em>，原来还有个忘记密码的操作，使用QQ查询用户，得到密保信息为<strong>西安</strong>，得到默认密码，登录拿到flag</p>
+<hr>
+<h3 id="web16"><a href="#web16" class="headerlink" title="web16"></a>web16</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910003416475.png" alt="image-20220910003416475"></p>
+<p>对于探针，我确实不了解，查看源码后觉得这段代码相当可疑</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910003546715.png" alt="image-20220910003546715"></p>
+<p>网上一查，确实有点问题，但是尝试了后，发现并没啥用</p>
+<p>然后就去看了<em><strong>hint</strong></em></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910003715607.png" alt="image-20220910003715607"></p>
+<p><em>老实说，我应该先搜索探针的，没有查到有用的东西，再看hint的</em></p>
+<p>然后我就去搜索了一下，找到一篇介绍博客</p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_43790779/article/details/108834213">https://blog.csdn.net/weixin_43790779/article/details/108834213</a></p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">h3</span> <span class="attr">bold</span>&gt;</span>什么是php探针<span class="tag">&lt;/<span class="name">h3</span>&gt;</span></span><br><span class="line">php探针是用来探测空间、服务器运行状况和PHP信息用的，探针可以实时查看服务器硬盘资源、内存占用、网卡流量、系统负载、服务器时间等信息。</span><br><span class="line"><span class="tag">&lt;<span class="name">h3</span> <span class="attr">bold</span>&gt;</span>php探针的功能<span class="tag">&lt;/<span class="name">h3</span>&gt;</span>：</span><br><span class="line">1、服务器环境探测：CPU、在线时间、内存使用状况、系统平均负载探测（支持LINUX、FreeBSD系统，需系统支持），操作系统、服务器域名、IP地址、解释引擎等 ；</span><br><span class="line">2、PHP基本特征探测：版本、运行方式、安全模式及常规参数；</span><br><span class="line">3、PHP组件支持探测：MYSQL、GD、XML、SESSION、SOCKET等组件支持情况 ；</span><br><span class="line">4、服务器性能检测：整数运算能力、浮点数运算能力、数据IO能力；</span><br><span class="line">5、自定义探测：MYSQL连接测试、MAIL发信测试、函数支持情况及PHP配置参数。</span><br><span class="line"><span class="tag">&lt;<span class="name">h2</span>&gt;</span>黑探针使用方法<span class="tag">&lt;/<span class="name">h2</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">h3</span>&gt;</span>法一：<span class="tag">&lt;/<span class="name">h3</span>&gt;</span>下载到本地电脑，再用 ftp 软件上传到网站任意目录中。绑定域名后，可以用类似域名 <span class="tag">&lt;<span class="name">h5</span> <span class="attr">bold</span>&gt;</span>/tz.php<span class="tag">&lt;/<span class="name">h5</span>&gt;</span> 这类网址访问。</span><br><span class="line"><span class="tag">&lt;<span class="name">h3</span>&gt;</span>法二：<span class="tag">&lt;/<span class="name">h3</span>&gt;</span>直接用 linux 命令行下载到服务器中，解压缩后使用。命令如下：</span><br></pre></td></tr></table></figure>
+
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910004811604.png" alt="image-20220910004811604"></p>
+<p>了解了什么是探针</p>
+<p>继续做题，网站后加*** tz.php*** 打开探针网页，搜索flag，没有找到，搜索phpinfo</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910004952046.png" alt="image-20220910004952046"></p>
+<p>点击<em>PHPINFO</em>进入phpinfo界面，搜索flag得到</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910005054273.png" alt="image-20220910005054273"></p>
+<hr>
+<h3 id="web17"><a href="#web17" class="headerlink" title="web17"></a>web17</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910005920447.png" alt="image-20220910005920447"></p>
+<p>网上查了sql的备份文件的后缀名，包括**.bak，.mdf，.ndf，.ldf**，尝试了sql+这些后缀名，然后实在是不知道在哪</p>
+<p>点开<em><strong>hint</strong></em></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910010126627.png" alt="image-20220910010126627"></p>
+<p>这个着实没想到，<strong>backup:备份</strong>，备份的sql文件， <strong>back.sql</strong>，下载得flag</p>
+<hr>
+<h3 id="web18"><a href="#web18" class="headerlink" title="web18"></a>web18</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910011333614.png" alt="image-20220910011333614"></p>
+<p>一看就是要修改分数或者直接通过源代码得</p>
+<p>burp抓不到包，这是js控制的，查看一下源代码</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910011443484.png" alt="image-20220910011443484"></p>
+<p>这串Unicode 应该与flag有关，解码得</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910011530744.png" alt="image-20220910011530744"></p>
+<p>url+110.php得到flag</p>
+<hr>
+<h3 id="web19"><a href="#web19" class="headerlink" title="web19"></a>web19</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910013820807.png" alt="image-20220910013820807"></p>
+<p>查看源码</p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910013841766.png" alt="image-20220910013841766"></p>
+<p>既有密钥的生成模式，又有密码</p>
+<p>然后我根据密钥进行解密<img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910013942936.png" alt="image-20220910013942936"></p>
+<p>之后一直发送不出去，最后发现我从上一题一直开着代理，难怪一直没反应，麻了</p>
+<p>密码:*** i_want_a_36d_girl***</p>
+<p>一直没出结果，然后网上搜了下，还有种解法</p>
+<p><strong>另解：</strong></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910014525662.png" alt="image-20220910014525662"></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910014550526.png" alt="image-20220910014550526"></p>
+<p>抓包修改密码</p>
+<hr>
+<h3 id="web20"><a href="#web20" class="headerlink" title="web20"></a>web20</h3><p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910015045814.png" alt="image-20220910015045814"></p>
+<p>我知道mdb文件，但是并不知道mdb文件的文件名，在尝试了我觉得可能的文件名后，果断放弃了</p>
+<p><em><strong>hint</strong></em></p>
+<p><img src="/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86%5Cimage-20220910015158907.png" alt="image-20220910015158907"></p>
+<p>看到这个的时候我去百度了一下，没有查到mdb文件的默认文件名和路径名，这种题就很离谱，信息我觉得不是能够支持我做这题</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这20到信息搜集的题目，有的题目比较扯，当然大部分题目都还是好的，做下来感觉自己对于信息搜集有了新的认知：</p>
+<ul>
+<li>phps泄露</li>
+<li>网站源码泄露的一些样式</li>
+<li>editor信息泄露</li>
+<li>php探针</li>
+<li>当然最重要的是思维的训练，ctf题最重要的是有思维，找到解题的出口</li>
+</ul>
+<p>不过就我所了解的信息搜集，还有其他的东西，比如说用<em><strong>nmap</strong></em>搜索主机类型和一些端口之类的，服务器版本，中间件类型等</p>
+<p>还得多去实践</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://qiuweb.github.io">Qweb</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://qiuweb.github.io/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/">https://qiuweb.github.io/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://qiuweb.github.io" target="_blank">web渗透学习</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="/./img/bg.jpg" data-sites="wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%861/"><img class="next-cover" src="/./img/bg.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">信息搜集</div></div></a></div></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/./img/hacker.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Qweb</div><div class="author-info__description">web从0到1</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">4</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">1</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/qiuweb"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/qiuweb" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#web1"><span class="toc-number">1.</span> <span class="toc-text">web1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web2"><span class="toc-number">2.</span> <span class="toc-text">web2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web3"><span class="toc-number">3.</span> <span class="toc-text">web3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web4"><span class="toc-number">4.</span> <span class="toc-text">web4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web5"><span class="toc-number">5.</span> <span class="toc-text">web5</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web6"><span class="toc-number">6.</span> <span class="toc-text">web6</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web7"><span class="toc-number">7.</span> <span class="toc-text">web7</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web8"><span class="toc-number">8.</span> <span class="toc-text">web8</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web9"><span class="toc-number">9.</span> <span class="toc-text">web9</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web10"><span class="toc-number">10.</span> <span class="toc-text">web10</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web11"><span class="toc-number">11.</span> <span class="toc-text">web11</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web12"><span class="toc-number">12.</span> <span class="toc-text">web12</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web13"><span class="toc-number">13.</span> <span class="toc-text">web13</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web14"><span class="toc-number">14.</span> <span class="toc-text">web14</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web15"><span class="toc-number">15.</span> <span class="toc-text">web15</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web16"><span class="toc-number">16.</span> <span class="toc-text">web16</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web17"><span class="toc-number">17.</span> <span class="toc-text">web17</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web18"><span class="toc-number">18.</span> <span class="toc-text">web18</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web19"><span class="toc-number">19.</span> <span class="toc-text">web19</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#web20"><span class="toc-number">20.</span> <span class="toc-text">web20</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number"></span> <span class="toc-text">总结</span></a></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/" title="信息搜集1"><img src="/./img/bg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="信息搜集1"/></a><div class="content"><a class="title" href="/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%86/" title="信息搜集1">信息搜集1</a><time datetime="2022-09-09T18:08:11.000Z" title="发表于 2022-09-10 02:08:11">2022-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%861/" title="信息搜集"><img src="/./img/bg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="信息搜集"/></a><div class="content"><a class="title" href="/2022/09/10/ctfshow-%E4%BF%A1%E6%81%AF%E6%90%9C%E9%9B%861/" title="信息搜集">信息搜集</a><time datetime="2022-09-09T18:03:11.000Z" title="发表于 2022-09-10 02:03:11">2022-09-10</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/09/begin/" title="伊始"><img src="/./img/bg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="伊始"/></a><div class="content"><a class="title" href="/2022/09/09/begin/" title="伊始">伊始</a><time datetime="2022-09-08T22:00:11.000Z" title="发表于 2022-09-09 06:00:11">2022-09-09</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/2022/09/08/hello-world/" title="Hello World"><img src="/./img/bg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Hello World"/></a><div class="content"><a class="title" href="/2022/09/08/hello-world/" title="Hello World">Hello World</a><time datetime="2022-09-07T16:10:15.996Z" title="发表于 2022-09-08 00:10:15">2022-09-08</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2022 By Qweb</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div id="local-search-results"></div></div></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/local-search.js"></script><div class="js-pjax"></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener scroll 
+  window.tocScrollFn && window.removeEventListener('scroll', window.tocScrollFn)
+  window.scrollCollect && window.removeEventListener('scroll', scrollCollect)
+
+  typeof preloader === 'object' && preloader.initLoading()
+  document.getElementById('rightside').style.cssText = "opacity: ''; transform: ''"
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
